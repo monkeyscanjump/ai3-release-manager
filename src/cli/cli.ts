@@ -10,10 +10,68 @@ import { ensureAbsolutePath, isRunningUnderPM2 } from '@/utils/env';
 import defaults from '@/config/defaults';
 
 /**
+ * Display help information and exit
+ */
+function displayHelp(): void {
+  console.log(`
+AI3 Release Manager
+A robust utility for downloading assets from GitHub releases
+
+USAGE:
+  ai3-release-manager [OPTIONS]
+  ai3-release-manager <repo> <network-type> [output-directory]
+  ai3-release-manager --repo <repo> --network <network-type> [OPTIONS]
+
+EXAMPLES:
+  ai3-release-manager                                  # Use defaults (autonomys/subspace mainnet)
+  ai3-release-manager subspace/subspace mainnet        # Download from specified repo and network
+  ai3-release-manager --repo subspace/subspace --network mainnet --output ./downloads --executable
+
+OPTIONS:
+  -h, --help                   Show this help message and exit
+  -r, --repo <repo>            Repository name in format 'owner/repo'
+                               Default: ${defaults.defaultRepo}
+  -n, --network <network>      Network type (${defaults.validNetworkTypes.join(', ')})
+                               Default: ${defaults.defaultNetworkType}
+  -o, --output <dir>           Output directory for downloaded files
+                               Default: ${defaults.defaultOutputDir}
+  -f, --force                  Force download even if files already exist
+  -e, --executable             Make downloaded files executable (Unix systems)
+  -v, --verbose                Show verbose output
+  -c, --concurrency <num>      Number of concurrent downloads
+                               Default: ${defaults.defaultConcurrency}
+  --log-file [path]            Enable logging to file (optional path)
+  -t, --token <token>          GitHub API token for authenticated requests
+
+ENVIRONMENT VARIABLES:
+  GITHUB_REPO                  Repository name
+  NETWORK_TYPE                 Network type
+  OUTPUT_DIR                   Output directory
+  FORCE_UPDATE                 Force update (true or false)
+  MAKE_EXECUTABLE              Make files executable (true or false)
+  GITHUB_TOKEN                 GitHub API token
+  CONFIG_FILE                  Path to config file (default: ${defaults.defaultConfigFilePath})
+
+CONFIGURATION FILE:
+  Configuration can also be provided in JSON format in:
+  - ${defaults.defaultConfigFilePath}
+  - ~/.ai3-release-manager.json
+
+For more information, see: https://github.com/monkeyscanjump/ai3-release-manager
+`);
+  process.exit(0);
+}
+
+/**
  * Parse command line arguments with better options
  */
 export function parseCliArguments(): DownloaderOptions {
   const args = process.argv.slice(2);
+
+  // Show help if requested
+  if (args.includes('--help') || args.includes('-h')) {
+    displayHelp();
+  }
 
   // Check for environment variables first
   const envRepo = process.env.GITHUB_REPO;

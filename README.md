@@ -1,4 +1,4 @@
-# GitHub Release Downloader
+# AI3 Release Manager
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -20,24 +20,19 @@ A robust and feature-rich utility for downloading assets from GitHub releases. T
 
 ## Installation
 
-### Global Installation
+### Install from NPM
 
 ```bash
-# Install from GitHub repository
+npm install -g ai3-release-manager
+```
+
+### Install from GitHub
+
+```bash
 npm install -g github:monkeyscanjump/ai3-release-manager
 
 # Or with HTTPS
 npm install -g https://github.com/monkeyscanjump/ai3-release-manager.git
-```
-
-### Local Installation (for use in projects)
-
-```bash
-# As a dependency in your project
-npm install --save github:monkeyscanjump/ai3-release-manager
-
-# Or with HTTPS
-npm install --save https://github.com/monkeyscanjump/ai3-release-manager.git
 ```
 
 ### Installation from Source
@@ -60,6 +55,14 @@ npm install -g .
 ### Basic Usage
 
 ```bash
+ai3-release-manager
+```
+
+This will use the default repository (`autonomys/subspace`) and network type (`mainnet`).
+
+### Custom Repository and Network
+
+```bash
 ai3-release-manager <repo> <network-type> [output-directory]
 ```
 
@@ -77,10 +80,10 @@ ai3-release-manager --repo <repo> --network <network-type> --output <output-dire
 
 ### CLI Options
 
-| Option | Shorthand | Description |
-|--------|-----------|-------------|
-| `--repo`, `-r` | Repository name in format `owner/repo` | Required |
-| `--network`, `-n` | Network type (mainnet, testnet, devnet, taurus) | Required |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--repo`, `-r` | Repository name in format `owner/repo` | `autonomys/subspace` |
+| `--network`, `-n` | Network type (mainnet, testnet, devnet, taurus) | `mainnet` |
 | `--output`, `-o` | Output directory for downloaded files | downloads |
 | `--force`, `-f` | Force download even if files already exist | `false` |
 | `--executable`, `-e` | Make downloaded files executable (Unix systems) | `false` |
@@ -93,29 +96,30 @@ ai3-release-manager --repo <repo> --network <network-type> --output <output-dire
 
 You can also use environment variables to configure the downloader:
 
-| Environment Variable | Description | Corresponding Option |
-|---------------------|-------------|---------------------|
-| `GITHUB_REPO` | GitHub repository name | `--repo` |
-| `NETWORK_TYPE` | Network type | `--network` |
-| `OUTPUT_DIR` | Output directory | `--output` |
-| `FORCE_UPDATE` | Force update (`true` or `false`) | `--force` |
-| `MAKE_EXECUTABLE` | Make files executable (`true` or `false`) | `--executable` |
-| `GITHUB_TOKEN` | GitHub API token | `--token` |
-| `DOWNLOAD_CONCURRENCY` | Number of concurrent downloads | `--concurrency` |
-| `CONFIG_FILE` | Path to config file | N/A |
-| `DEBUG` | Enable debug logging when set | Sets verbose mode |
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `GITHUB_REPO` | GitHub repository name | `autonomys/subspace` |
+| `NETWORK_TYPE` | Network type | `mainnet` |
+| `OUTPUT_DIR` | Output directory | downloads |
+| `FORCE_UPDATE` | Force update (`true` or `false`) | `false` |
+| `MAKE_EXECUTABLE` | Make files executable (`true` or `false`) | `false` |
+| `GITHUB_TOKEN` | GitHub API token | None |
+| `CONFIG_FILE` | Path to config file | `./downloader-config.json` |
+| `DEBUG` | Enable debug logging when set | `false` |
 
 ## Programmatic Usage
 
 ### Basic Example
 
 ```typescript
-import { GithubReleaseDownloader, NetworkType } from 'ai3-release-manager';
+import { GithubReleaseDownloader } from 'ai3-release-manager';
 
 async function downloadRelease() {
+  // Use default repo and network if not specified
   const downloader = new GithubReleaseDownloader({
-    repo: 'subspace/subspace',
-    networkType: 'mainnet' as NetworkType,
+    // These parameters are optional and will use defaults if not specified
+    // repo: 'subspace/subspace',
+    // networkType: 'mainnet',
     outputDir: './downloads'
   });
 
@@ -134,7 +138,7 @@ downloadRelease().catch(console.error);
 ### Full Options Example
 
 ```typescript
-import { GithubReleaseDownloader, NetworkType, LogLevel } from 'ai3-release-manager';
+import { GithubReleaseDownloader, NetworkType } from 'ai3-release-manager';
 
 async function downloadWithOptions() {
   const downloader = new GithubReleaseDownloader({
@@ -209,12 +213,21 @@ interface DownloadSummary {
 
 ## Configuration Options
 
+### Default Behavior
+
+By default, the tool will:
+
+- Use repository: `autonomys/subspace`
+- Use network type: `mainnet`
+- Download to: downloads
+- Download default asset mappings (see below)
+
 ### DownloaderOptions
 
 | Option | Type | Description | Default |
 |--------|------|-------------|---------|
-| `repo` | `string` | GitHub repository name (required) | - |
-| `networkType` | `NetworkType` | Network type: 'mainnet', 'testnet', 'devnet', or 'taurus' (required) | - |
+| `repo` | `string` | GitHub repository name | `'autonomys/subspace'` |
+| `networkType` | `NetworkType` | Network type: 'mainnet', 'testnet', 'devnet', or 'taurus' | `'mainnet'` |
 | `assetMappings` | `AssetMapping[]` | Asset name mappings from GitHub to local | See below |
 | `outputDir` | `string` | Output directory for downloaded files | `'./downloads'` |
 | `forceUpdate` | `boolean` | Force download even if files already exist | `false` |
@@ -259,6 +272,35 @@ Default network prefixes:
   'taurus-': 'testnet',
   'mainnet-': 'mainnet',
   'devnet-': 'devnet'
+}
+```
+
+## Configuration File
+
+You can create a `downloader-config.json` file in your working directory or specify a path via the `CONFIG_FILE` environment variable. The tool also looks for a config file at `~/.ai3-release-manager.json`.
+
+Example configuration:
+
+```json
+{
+  "repo": "subspace/subspace",
+  "networkType": "mainnet",
+  "outputDir": "./downloads",
+  "forceUpdate": false,
+  "makeExecutable": true,
+  "verbose": false,
+  "concurrency": 2,
+  "logToFile": false,
+  "logFilePath": "./logs/download.log",
+  "token": "your-github-token",
+  "assetMappings": [
+    { "source": "subspace-farmer-ubuntu-x86_64-skylake", "output": "subspace-farmer" },
+    { "source": "subspace-node-ubuntu-x86_64-skylake", "output": "subspace-node" }
+  ],
+  "networkPrefixes": {
+    "custom-": "mainnet"
+  },
+  "cacheTTL": 300000
 }
 ```
 
@@ -310,158 +352,6 @@ On Windows systems, this feature does nothing as Windows handles executable perm
 
 When a GitHub token is provided, the downloader uses the GitHub API for more reliable data fetching. Without a token, it falls back to HTML scraping, which may be subject to rate limiting.
 
-## Configuration File
-
-You can create a `downloader-config.json` file in your working directory or specify a path via the `CONFIG_FILE` environment variable:
-
-```json
-{
-  "repo": "subspace/subspace",
-  "networkType": "mainnet",
-  "outputDir": "./downloads",
-  "forceUpdate": false,
-  "makeExecutable": true,
-  "verbose": false,
-  "concurrency": 2,
-  "logToFile": false,
-  "logFilePath": "./logs/download.log",
-  "token": "your-github-token",
-  "assetMappings": [
-    { "source": "subspace-farmer-ubuntu-x86_64-skylake", "output": "subspace-farmer" },
-    { "source": "subspace-node-ubuntu-x86_64-skylake", "output": "subspace-node" }
-  ],
-  "networkPrefixes": {
-    "custom-": "mainnet"
-  },
-  "cacheTTL": 300000
-}
-```
-
-## Logging Levels
-
-The logger supports four levels of logging:
-
-- 🔍 **DEBUG**: Detailed information for debugging purposes
-- ℹ️ **INFO**: General information about the download process
-- ⚠️ **WARN**: Warnings that don't prevent the download from completing
-- ❌ **ERROR**: Critical errors that prevent successful download
-
-## Examples
-
-### Download Latest Mainnet Release
-
-```bash
-ai3-release-manager subspace/subspace mainnet
-```
-
-### Force Update with Custom Output Directory
-
-```bash
-ai3-release-manager --repo subspace/subspace --network mainnet --output ./my-binaries --force
-```
-
-### Download and Make Files Executable (Linux/macOS)
-
-```bash
-ai3-release-manager subspace/subspace mainnet --executable
-```
-
-### With High Concurrency and Verbose Logging
-
-```bash
-ai3-release-manager subspace/subspace mainnet ./downloads -c 4 -v
-```
-
-### Using a GitHub Token for Higher Rate Limits
-
-```bash
-export GITHUB_TOKEN=your-token-here
-ai3-release-manager subspace/subspace mainnet
-```
-
-## More Usage Examples
-
-### Download With Custom Asset Mappings via Config File
-
-Create a `downloader-config.json` file:
-
-```json
-{
-  "assetMappings": [
-    { "source": "custom-binary-darwin-amd64", "output": "my-app-macos" },
-    { "source": "custom-binary-linux-amd64", "output": "my-app-linux" }
-  ]
-}
-```
-
-Then run:
-
-```bash
-ai3-release-manager organization/repo mainnet
-```
-
-### Download with Verbose Output and Custom Concurrency
-
-```bash
-ai3-release-manager organization/repo mainnet -v -c 4
-```
-
-### Resume Interrupted Downloads
-
-If downloads are interrupted, simply run the same command again:
-
-```bash
-ai3-release-manager organization/repo mainnet
-```
-
-The tool will automatically continue from where it left off for any partially downloaded files.
-
-### Use with Environment Variables in a Script
-
-```bash
-#!/bin/bash
-export GITHUB_REPO="organization/repo"
-export NETWORK_TYPE="mainnet"
-export OUTPUT_DIR="./my-binaries"
-export FORCE_UPDATE="true"
-export MAKE_EXECUTABLE="true"
-export GITHUB_TOKEN="your-github-token"
-
-ai3-release-manager
-```
-
-### Download and Make Files Executable on Linux/macOS
-
-```bash
-ai3-release-manager organization/repo mainnet --executable
-```
-
-### Download with GitHub API Token from Environment
-
-```bash
-export GITHUB_TOKEN="your-github-token"
-ai3-release-manager organization/repo mainnet
-```
-
-### Use with Custom Network Prefixes
-
-Create a config file with custom network prefixes:
-
-```json
-{
-  "networkPrefixes": {
-    "production-": "mainnet",
-    "staging-": "testnet"
-  }
-}
-```
-
-Then run:
-
-```bash
-ai3-release-manager organization/repo mainnet
-```
-
 ## Running with PM2
 
 ### Basic PM2 Deployment
@@ -473,6 +363,34 @@ pm2 start ai3-release-manager -- subspace/subspace mainnet /data/downloads
 # Using ecosystem file
 pm2 start ecosystem.config.js
 ```
+
+### Sample PM2 Ecosystem File
+
+```javascript
+module.exports = {
+  apps: [{
+    name: "ai3-release-manager",
+    script: "ai3-release-manager",
+    args: "--repo subspace/subspace --network mainnet --output /data/downloads --executable",
+    env: {
+      GITHUB_TOKEN: "your-github-token"
+    },
+    log_date_format: "YYYY-MM-DD HH:mm:ss",
+    autorestart: true,
+    watch: false,
+    max_memory_restart: "100M"
+  }]
+};
+```
+
+## Logging Levels
+
+The logger supports four levels of logging:
+
+- 🔍 **DEBUG**: Detailed information for debugging purposes
+- ℹ️ **INFO**: General information about the download process
+- ⚠️ **WARN**: Warnings that don't prevent the download from completing
+- ❌ **ERROR**: Critical errors that prevent successful download
 
 ## Common Issues and Troubleshooting
 
