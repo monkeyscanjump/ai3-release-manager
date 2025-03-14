@@ -16,11 +16,12 @@
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint --ext .ts ./src",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "echo \"No tests yet\"",
     "check-update": "ts-node -r tsconfig-paths/register src/utils/update-checker.ts"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/monkeyscanjump/ai3-release-manager.git"
@@ -44,14 +45,17 @@
     "@eslint/js": "^8.56.0",
     "@types/node": "^20.10.4",
     "@types/semver": "^7.5.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "eslint": "^9.0.0-alpha.0",
+    "glob": "^10.3.10",
     "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.11",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3",
-    "glob": "^10.3.10",
-    "rimraf": "^5.0.5"
+    "typescript-eslint": "^8.26.1"
   },
   "optionalDependencies": {
     "@pm2/io": "^5.0.2"
