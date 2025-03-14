@@ -69,7 +69,7 @@ ai3-release-manager <repo> <network-type> [output-directory]
 Example:
 
 ```bash
-ai3-release-manager subspace/subspace mainnet ./downloads
+ai3-release-manager autonomys/subspace mainnet ./downloads
 ```
 
 ### Advanced Usage
@@ -118,7 +118,7 @@ async function downloadRelease() {
   // Use default repo and network if not specified
   const downloader = new GithubReleaseDownloader({
     // These parameters are optional and will use defaults if not specified
-    // repo: 'subspace/subspace',
+    // repo: 'autonomys/subspace',
     // networkType: 'mainnet',
     outputDir: './downloads'
   });
@@ -142,7 +142,7 @@ import { GithubReleaseDownloader, NetworkType } from 'ai3-release-manager';
 
 async function downloadWithOptions() {
   const downloader = new GithubReleaseDownloader({
-    repo: 'subspace/subspace',
+    repo: 'autonomys/subspace',
     networkType: 'mainnet' as NetworkType,
     outputDir: './downloads',
     forceUpdate: true,
@@ -283,7 +283,7 @@ Example configuration:
 
 ```json
 {
-  "repo": "subspace/subspace",
+  "repo": "autonomys/subspace",
   "networkType": "mainnet",
   "outputDir": "./downloads",
   "forceUpdate": false,
@@ -358,7 +358,7 @@ When a GitHub token is provided, the downloader uses the GitHub API for more rel
 
 ```bash
 # Start with PM2
-pm2 start ai3-release-manager -- subspace/subspace mainnet /data/downloads
+pm2 start ai3-release-manager -- autonomys/subspace mainnet /data/downloads
 
 # Using ecosystem file
 pm2 start ecosystem.config.js
@@ -371,7 +371,7 @@ module.exports = {
   apps: [{
     name: "ai3-release-manager",
     script: "ai3-release-manager",
-    args: "--repo subspace/subspace --network mainnet --output /data/downloads --executable",
+    args: "--repo autonomys/subspace --network mainnet --output /data/downloads --executable",
     env: {
       GITHUB_TOKEN: "your-github-token"
     },

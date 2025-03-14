@@ -35,12 +35,17 @@ let io: PM2IoInterface | null = null;
 
 // Try to load pm2io if available
 try {
-  pmx = require('@pm2/io');
-  io = pmx.init({
-    tracing: {
-      enabled: true,
-      detailedDatabasesCalls: true
-    }
+  // Dynamic import for PM2
+  import('@pm2/io').then(module => {
+    pmx = module.default || module;
+    io = pmx.init({
+      tracing: {
+        enabled: true,
+        detailedDatabasesCalls: true
+      }
+    });
+  }).catch(err => {
+    Logger.debug('PM2io module not available, metrics will be disabled');
   });
 } catch (e) {
   // PM2io module not available, which is fine

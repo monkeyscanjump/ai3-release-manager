@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as semver from 'semver';
-import { Logger } from './logger';
+import { Logger } from '@/utils/logger';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -8,7 +8,6 @@ import * as path from 'path';
 const packageJsonPath = path.resolve(__dirname, '../../package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const currentVersion = packageJson.version;
-const packageName = packageJson.name;
 
 /**
  * Check for updates from npm registry
@@ -16,7 +15,7 @@ const packageName = packageJson.name;
 export async function checkForUpdates(silent = false): Promise<boolean> {
   try {
     const response = await axios.get(
-      `https://registry.npmjs.org/${packageName}`
+      `https://registry.npmjs.org/ai3-release-manager`
     );
 
     const latestVersion = response.data['dist-tags']?.latest;
@@ -32,7 +31,7 @@ export async function checkForUpdates(silent = false): Promise<boolean> {
       if (!silent) {
         Logger.info('═════════════════════════════════════════════');
         Logger.info(`Update available: ${currentVersion} → ${latestVersion}`);
-        Logger.info(`Run: npm i -g ${packageName}@latest`);
+        Logger.info('Run: npm i -g ai3-release-manager@latest');
         Logger.info('═════════════════════════════════════════════');
       }
       return true;
